@@ -7,8 +7,14 @@
 # 3. Configure the solver and arch files according to the experiment setting.
 # 4. Train/test using the solver and architecture file
 
-task=1 #1: train, 2: continue_train, 3: finetune, 4: test
+##### set up directories
+exp_dir=../../../exp
+basedir=$exp_dir/dataset/gsl2014_hhv_ima/batches_land_free_65
+solverdir=../solver/train
+deploydir=../solver/predict
 
+# set experiment parameters
+task=1 #1: train, 2: continue_train, 3: finetune, 4: test
 channels=3
 cropsize=45 #effective input patch size
 labelcropsize=45 #45 # effective label size
@@ -16,12 +22,10 @@ resizelabel=12 # resize croped label to resizelabel for fcn
 # loss type: L1 or L2
 loss=L2 #L2, L1
 scale=1.0 # keep it 1.0
-finetune=0 # finetune from layer 1 and up
-label_noise=0
-#basedir=/home/lein/sar_dnn/dataset/gsl2014_hhv_ima/batches_hvia_45
-#basedir=/home/lein/sar_dnn/dataset/gsl2014_hhv_ima/batches_land_free_65
-exp_dir=../../../exp
-basedir=$exp_dir/sar_dnn/dataset/gsl2014_hhv_ima/batches_land_free_65
+finetune=0 # the number of layers to be frozen for finetune. 0 means finetune from layer 1 and up
+label_noise=0 # add noise to training sample labels, useful for testing the sensitivity of the model to training sample noise
+snapshot_iter=5000 # use this .solverstate file/model to initialize network paramters,  used when task=2
+finetune_iter=5000 # use this .caffemodel file/model to initialize network parameters,  used when task=3
 
 method=BASE # model: BASE or EM # or SUM_SPLIT
 experiment=NONE #SQUEEZE #EVA_RANDOM_NOISE # experiment to run
@@ -30,7 +34,7 @@ then
   solver_arch=solver_base_fcn.prototxt
   deploy_arch=deploy_base_fcn.prototxt
   snapshotdir=model_${method}_${scale}_${loss}
-  basedir=$exp_dir/sar_dnn/dataset/beaufort_2010_2011/batches_${cropsize}_label_noise_$1
+  basedir=$exp_dir/dataset/beaufort_2010_2011/batches_${cropsize}_label_noise_$1
   label_noise=$1
 elif [ "$experiment" = FINETUNE_EXP ] # fine tuning experiment
 then
@@ -58,23 +62,27 @@ else # standard experiment
   #snapshotdir=model_${method}_${scale}_${loss}_lou_${1}
   snapshotdir=model_${method}_${scale}_${loss}
 fi
-
+solver_arch=$solverdir/$solver_arch
+deploy_arch=$deloydir/$deploy_arch
 snapshotdir=${basedir}/${snapshotdir}
+
+##### make experiment directory to save trained models
 mkdir -p $snapshotdir
 
 # continue_training params, set task=2 to use
-snapshot_iter=50000
 snapshot=${snapshotdir}/_iter_${snapshot_iter}.solverstate
 
 # finetune / test params, set task=3 to use
-finetune_iter=50000
 modeldir=$exp_dir/dataset/gsl2014_hhv_ima/batches_land_free_65/model_base_l1/
 weights=${modeldir}/_iter_${finetune_iter}.caffemodel
 
 
+#### set image batches and label batches for caffe
+### TODO (LEI): combine image batches and label batches to one file
 batchdir=${basedir}/batch
 targetdir=${basedir}/label
 
+#### set up the mean value file and the the split of training/testing of samples, only batch files listed in the trainsource will be used for training. Check ../caffe/src/caffe/layers/datum_data_layer.cpp to see how trainsource is used. 1.0 is the scale of the training samples.
 meanfile=${basedir}/mean_std_${scale}.txt
 trainsourcedir=${batchdir}
 trainsource=${batchdir}/train_source_1.0.txt
@@ -139,7 +147,7 @@ sed -i "s${fancyDelim}\$method${fancyDelim}${method}${fancyDelim}g" ${solver}
 
 
 
-
+### set the bottom $finetune number of layers to have learning rate 0
 for idx in {1..5}
 do
   if [ "$idx" -lt "$finetune" ]
