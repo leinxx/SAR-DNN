@@ -1,0 +1,9 @@
+/deepvis/
+/src/
+/tools/
+/deeplab-public-back/
+/caffe/
+/densecrf/
+.solver*
+.arch*
+.fill*

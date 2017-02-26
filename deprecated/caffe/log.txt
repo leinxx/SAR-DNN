@@ -1,0 +1,81 @@
+CXX src/caffe/layers/datum_data_layer.cpp
+src/caffe/layers/datum_data_layer.cpp: In member function ‘virtual void caffe::DatumDataLayer<Dtype>::load_batch(caffe::Batch<Dtype>*)’:
+src/caffe/layers/datum_data_layer.cpp:219:9: error: redeclaration of ‘int offset’
+     int offset = batch->label_.offset(idx);
+         ^
+src/caffe/layers/datum_data_layer.cpp:205:9: error: ‘int offset’ previously declared here
+     int offset = batch->data_.offset(idx);
+         ^
+src/caffe/layers/datum_data_layer.cpp:230:51: error: ‘i’ was not declared in this scope
+       prefetch_label[batch->label_->offset(idx) + i] *= label_scale; 
+                                                   ^
+src/caffe/layers/datum_data_layer.cpp: In instantiation of ‘void caffe::DatumDataLayer<Dtype>::load_batch(caffe::Batch<Dtype>*) [with Dtype = float]’:
+src/caffe/layers/datum_data_layer.cpp:299:1:   required from here
+src/caffe/layers/datum_data_layer.cpp:209:7: error: no matching function for call to ‘caffe::DataTransformer<float>::Transform(caffe::Datum&, caffe::Blob<float>*, caffe::Datum&, float*)’
+       this->data_transformer_->Transform(datum, &(this->transformed_data_), label, prefetch_label + batch->label_.offset(idx) );
+       ^
+src/caffe/layers/datum_data_layer.cpp:209:7: note: candidates are:
+In file included from ./include/caffe/data_layers.hpp:12:0,
+                 from src/caffe/layers/datum_data_layer.cpp:7:
+./include/caffe/data_transformer.hpp:38:8: note: void caffe::DataTransformer<Dtype>::Transform(const caffe::Datum&, caffe::Blob<Dtype>*) [with Dtype = float]
+   void Transform(const Datum& datum, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:38:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:50:8: note: void caffe::DataTransformer<Dtype>::Transform(const std::vector<caffe::Datum>&, caffe::Blob<Dtype>*) [with Dtype = float]
+   void Transform(const vector<Datum> & datum_vector,
+        ^
+./include/caffe/data_transformer.hpp:50:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:64:8: note: void caffe::DataTransformer<Dtype>::Transform(const std::vector<cv::Mat>&, caffe::Blob<Dtype>*) [with Dtype = float]
+   void Transform(const vector<cv::Mat> & mat_vector,
+        ^
+./include/caffe/data_transformer.hpp:64:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:77:8: note: void caffe::DataTransformer<Dtype>::Transform(const cv::Mat&, caffe::Blob<Dtype>*) [with Dtype = float]
+   void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:77:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:91:8: note: void caffe::DataTransformer<Dtype>::Transform(caffe::Blob<Dtype>*, caffe::Blob<Dtype>*) [with Dtype = float]
+   void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:91:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:143:8: note: void caffe::DataTransformer<Dtype>::Transform(const caffe::Datum&, Dtype*, const caffe::Datum*, Dtype*) [with Dtype = float]
+   void Transform(const Datum& datum, Dtype* transformed_data,
+        ^
+./include/caffe/data_transformer.hpp:143:8: note:   no known conversion for argument 2 from ‘caffe::Blob<float>*’ to ‘float*’
+src/caffe/layers/datum_data_layer.cpp:230:35: error: base operand of ‘->’ has non-pointer type ‘caffe::Blob<float>’
+       prefetch_label[batch->label_->offset(idx) + i] *= label_scale; 
+                                   ^
+src/caffe/layers/datum_data_layer.cpp: In instantiation of ‘void caffe::DatumDataLayer<Dtype>::load_batch(caffe::Batch<Dtype>*) [with Dtype = double]’:
+src/caffe/layers/datum_data_layer.cpp:299:1:   required from here
+src/caffe/layers/datum_data_layer.cpp:209:7: error: no matching function for call to ‘caffe::DataTransformer<double>::Transform(caffe::Datum&, caffe::Blob<double>*, caffe::Datum&, double*)’
+       this->data_transformer_->Transform(datum, &(this->transformed_data_), label, prefetch_label + batch->label_.offset(idx) );
+       ^
+src/caffe/layers/datum_data_layer.cpp:209:7: note: candidates are:
+In file included from ./include/caffe/data_layers.hpp:12:0,
+                 from src/caffe/layers/datum_data_layer.cpp:7:
+./include/caffe/data_transformer.hpp:38:8: note: void caffe::DataTransformer<Dtype>::Transform(const caffe::Datum&, caffe::Blob<Dtype>*) [with Dtype = double]
+   void Transform(const Datum& datum, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:38:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:50:8: note: void caffe::DataTransformer<Dtype>::Transform(const std::vector<caffe::Datum>&, caffe::Blob<Dtype>*) [with Dtype = double]
+   void Transform(const vector<Datum> & datum_vector,
+        ^
+./include/caffe/data_transformer.hpp:50:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:64:8: note: void caffe::DataTransformer<Dtype>::Transform(const std::vector<cv::Mat>&, caffe::Blob<Dtype>*) [with Dtype = double]
+   void Transform(const vector<cv::Mat> & mat_vector,
+        ^
+./include/caffe/data_transformer.hpp:64:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:77:8: note: void caffe::DataTransformer<Dtype>::Transform(const cv::Mat&, caffe::Blob<Dtype>*) [with Dtype = double]
+   void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:77:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:91:8: note: void caffe::DataTransformer<Dtype>::Transform(caffe::Blob<Dtype>*, caffe::Blob<Dtype>*) [with Dtype = double]
+   void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
+        ^
+./include/caffe/data_transformer.hpp:91:8: note:   candidate expects 2 arguments, 4 provided
+./include/caffe/data_transformer.hpp:143:8: note: void caffe::DataTransformer<Dtype>::Transform(const caffe::Datum&, Dtype*, const caffe::Datum*, Dtype*) [with Dtype = double]
+   void Transform(const Datum& datum, Dtype* transformed_data,
+        ^
+./include/caffe/data_transformer.hpp:143:8: note:   no known conversion for argument 2 from ‘caffe::Blob<double>*’ to ‘double*’
+src/caffe/layers/datum_data_layer.cpp:230:35: error: base operand of ‘->’ has non-pointer type ‘caffe::Blob<double>’
+       prefetch_label[batch->label_->offset(idx) + i] *= label_scale; 
+                                   ^

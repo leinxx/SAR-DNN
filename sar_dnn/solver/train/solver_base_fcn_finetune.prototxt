@@ -1,0 +1,419 @@
+net: "$net"
+base_lr: 0.0005
+lr_policy: "step"
+gamma: 0.1
+stepsize: 20000
+display: 100
+max_iter: 30000
+momentum: 0.9
+weight_decay: 0.0005
+snapshot: 1000
+snapshot_prefix: "$snapshot"
+solver_mode: GPU
+random_seed: 1700
+average_loss: 100
+test_interval: 1000
+test_iter: 132
+train_state: {stage: '$loss' stage: '$method'}
+test_state: {stage: '$loss' stage: '$method'}
+
+#test_iter: 70
+#debug_info: true
+
+##splitmark##
+name: "CaffeNet"
+layers {
+  name: "data"
+  type: DATUM_DATA
+  top: "data"
+  top: "label"
+  datum_data_param {
+    source: "$train_source"
+    source_dir: "$train_source_dir"
+    target_source: "$train_target_source"
+    mean_file: "$train_mean"
+    shuffle: true
+    batch_size: 128
+    label_scale: 0.1
+    #binary_label: 0
+  }
+  transform_param {
+    crop_size: $crop_size
+    label_crop_size: $label_crop_size
+    resize_label: $resize_label
+    mirror: true
+    rotate: true
+    #gitter_mean_range: 0 # the range of the gaussian mean
+    #gitter_std: 0 # the std of the gaussian
+    mean_value_file: "$train_mean" 
+  }
+  include: { phase: TRAIN }
+}
+
+layers {
+  name: "data"
+  type: DATUM_DATA
+  top: "data"
+  top: "label"
+  datum_data_param {
+    source: "$test_source"
+    source_dir: "$test_source_dir"
+    target_source: "$test_target_source"
+    mean_file: "$train_mean"
+    shuffle: true
+    batch_size: 128
+    label_scale: 0.1
+  }
+  transform_param {
+    crop_size: $crop_size
+    label_crop_size: $label_crop_size
+    resize_label: $resize_label
+    mirror: false
+    rotate: false
+    mean_value_file: "$train_mean" 
+  }
+  include: { phase: TEST }
+}
+
+layers {
+  name: "conv1"
+  type: CONVOLUTION
+  bottom: "data"
+  top: "conv1"
+  blobs_lr: $lr_1_1
+  blobs_lr: $lr_1_2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 64
+    kernel_size: 5
+    pad: 2
+    weight_filler {
+      type: "uniform"
+      min: -0.05
+      max: 0.05
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layers {
+  name: "relu1"
+  type: RELU
+  bottom: "conv1"
+  top: "conv1"
+}
+layers {
+  name: "pool1"
+  type: POOLING
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    pad: 1
+  }
+}
+layers {
+  name: "conv2"
+  type: CONVOLUTION
+  bottom: "pool1"
+  top: "conv2"
+  blobs_lr: $lr_2_1
+  blobs_lr: $lr_2_2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 128
+    kernel_size: 5
+    pad: 2
+    weight_filler {
+      type: "uniform"
+      min: -0.05
+      max: 0.05
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layers {
+  name: "relu2"
+  type: RELU
+  bottom: "conv2"
+  top: "conv2"
+}
+layers {
+  name: "pool2"
+  type: POOLING
+  bottom: "conv2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    pad: 1
+  }
+}
+layers {
+  name: "conv3"
+  type: CONVOLUTION
+  bottom: "pool2"
+  top: "conv3"
+  blobs_lr: $lr_3_1
+  blobs_lr: $lr_3_2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 128
+    kernel_size: 5
+    pad: 2
+    weight_filler {
+      type: "uniform"
+      min: -0.05
+      max: 0.05
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layers {
+  name: "relu3"
+  type: RELU
+  bottom: "conv3"
+  top: "conv3"
+}
+layers {
+  name: "fc4"
+  type: CONVOLUTION
+  bottom: "conv3"
+  top: "fc4"
+  blobs_lr: $lr_4_1
+  blobs_lr: $lr_4_2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 1024
+    kernel_size: 6
+    pad: 5
+    hole: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.0005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layers {
+  name: "relu4"
+  type: RELU
+  bottom: "fc4"
+  top: "fc4"
+}
+layers {
+  name: "drop4"
+  type: DROPOUT
+  bottom: "fc4"
+  top: "fc4"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layers {
+  name: "fc5"
+  type: CONVOLUTION
+  bottom: "fc4"
+  top: "fc5"
+  blobs_lr: $lr_5_1
+  blobs_lr: $lr_5_2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 1
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.0005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+#layers {
+#  name: "Sig"
+#  type: SIGMOID
+#  bottom: "fc5"
+#  top: "fc5"
+#  include: {stage: 'BASE' not_stage: 'EM'}
+#}
+
+layers {
+  name: "fc5_sum"
+  type: SUM
+  bottom: "fc5"
+  bottom: "label"
+  top: "fc5_sum"
+  top: "label_sum"
+  sum_param {
+    ignore_label: 0
+    ignore_label: 1
+    ignore_label: 1.1
+    split_sum: true
+  }
+  include: {stage: 'SUM_SPLIT'}
+}
+
+layers {
+  name: "fc5_sum"
+  type: SUM
+  bottom: "fc5"
+  bottom: "label"
+  top: "fc5_sum"
+  top: "label_sum"
+  sum_param {
+    ignore_label: 1.1
+    split_sum: false
+  }
+  include: {stage: 'SUM'}
+}
+
+layers {
+  name: "loss_l2"
+  type: EUCLIDEAN_LOSS
+  bottom: "fc5_sum"
+  bottom: "label_sum"
+  top: "loss_l2"
+  loss_weight: 10
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: {stage: 'L2' not_stage: 'BASE' not_stage: 'EM'}
+}
+layers {
+  name: "loss_l1"
+  type: L1_LOSS
+  bottom: "fc5_sum"
+  bottom: "label_sum"
+  top: "loss_l1"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: {stage: 'L1' not_stage: 'BASE' not_stage: 'EM'}
+}
+
+layers {
+  bottom: "data"
+  bottom: "fc5"
+  bottom: "label"
+  top: "label_biased"
+  name: "label_biased"
+  type: ADAPTIVE_BIAS
+  adaptive_bias_param {
+    select_portion: 0.5
+    bias_scale: 1
+    bias_base: 0.3
+  }
+  include: { phase: TRAIN stage: 'EM'}
+}
+
+#layers {
+#  name: "loss"
+#  type: "ConstrainLoss"
+#  bottom: "fc5"
+#  bottom: "label"
+#  top: "loss_constrain"
+#  loss_weight: 0.5
+#  loss_param  {
+#    beta: 0.5
+#  }
+#}
+
+layers {
+  name: "loss_l2"
+  type: EUCLIDEAN_LOSS
+  bottom: "fc5"
+  bottom: "label"
+  top: "loss_l2"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TRAIN stage: 'L2' stage: 'BASE'}
+}
+layers {
+  name: "loss_l1"
+  type: L1_LOSS
+  bottom: "fc5"
+  bottom: "label"
+  top: "loss_l1"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TRAIN stage: 'L1' stage: 'BASE'}
+}
+
+#EM
+layers {
+  name: "loss_l2"
+  type: EUCLIDEAN_LOSS
+  bottom: "fc5"
+  bottom: "label_biased"
+  top: "loss_l2"
+  loss_weight: 10
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TRAIN stage: 'L2' stage: 'EM'}
+}
+layers {
+  name: "loss_l1"
+  type: L1_LOSS
+  bottom: "fc5"
+  bottom: "label_biased"
+  top: "loss_l1"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TRAIN stage: 'L1' stage: 'EM'}
+}
+
+#TEST
+layers {
+  name: "loss_l2"
+  type: EUCLIDEAN_LOSS
+  bottom: "fc5"
+  bottom: "label"
+  top: "loss_l2"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TEST stage: 'L2' not_stage: 'SUM' not_stage: 'SUM_SPLIT'}
+}
+layers {
+  name: "loss_l1"
+  type: L1_LOSS
+  bottom: "fc5"
+  bottom: "label"
+  top: "loss_l1"
+  loss_weight: 1
+  loss_param  {
+    ignore_label: 1.1
+  }
+  include: { phase: TEST  stage: 'L1' not_stage: 'SUM' not_stage: 'SUM_SPLIT'}
+}

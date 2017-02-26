@@ -1,0 +1,5 @@
+cnn/log*
+*.png
+*.npz
+*.tif
+*ipynb_checkpoints
